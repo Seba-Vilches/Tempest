@@ -1902,6 +1902,11 @@ class GameView {
         case 'ArrowRight':
           this.blaster.changingXPos = -7;
           break;
+        case 'Escape':
+          if (this.game.over === false) {
+            this.game.over = true;
+          }
+          break;
       }
     });
     document.addEventListener('keyup', (e) => {
@@ -1987,16 +1992,17 @@ class GameView {
 
     this.clickToStartTimer -= 1;
     const shapeName = (this.tubeNames && this.tubeNames[this.selectedShapeIndex]) || "DEFAULT_NAME";
-    Util.drawString(`${shapeName}`, [325, 224], 'small', 'align-left', GameView.CYAN, context);
-    Util.drawString('>', [425,224], 'small', 'align-right', GameView.CYAN, context)
-    Util.drawString('<', [305,224], 'small', 'align-right', GameView.CYAN, context)
-    Util.drawString('SELECT STARTER LEVEL', [80, 224], 'small', 'align-left', GameView.CYAN, context);
-    Util.drawString('POINT OR  < >  TO MOVE', [132, 255], 'small', 'align-left', GameView.YELLOW, context);
-    Util.drawString('CLICK OR SPACE TO SHOOT', [132, 271], 'small', 'align-left', GameView.YELLOW, context);
-    Util.drawString('FLIPPERS ARE HARMLESS MID-FLIP', [99, 293], 'small', 'align-left', GameView.RED, context);
-    Util.drawString('ENEMY BULLETS ARE DESTRUCTIBLE', [99, 309], 'small', 'align-left', GameView.RED, context);
-    Util.drawString('CODED BY DANIEL CHOI', [148, 406], 'small', 'align-left', GameView.CYAN, context);
-    Util.drawString('GITHUB - PORTFOLIO - MAILTO', [110, 422], 'small', 'align-left', GameView.CYAN, context);
+    Util.drawString(`${shapeName}`, [325, 124], 'small', 'align-left', GameView.CYAN, context);
+    Util.drawString('>', [405,124], 'small', 'align-right', GameView.CYAN, context)
+    Util.drawString('<', [305,124], 'small', 'align-right', GameView.CYAN, context)
+    Util.drawString('SELECT STARTER LEVEL', [80, 124], 'small', 'align-left', GameView.CYAN, context);
+    Util.drawString('INSTRUCTIONS', [80, 275], 'small', 'align-left', GameView.YELLOW, context);
+    Util.drawString('POINT OR  < >  TO MOVE', [99, 309], 'small', 'align-left', GameView.YELLOW, context);
+    Util.drawString('CLICK OR SPACE TO SHOOT', [99, 329], 'small', 'align-left', GameView.YELLOW, context);
+    Util.drawString('PRESS ESC TO OUIT', [99, 348], 'small', 'align-left', GameView.YELLOW, context);
+    Util.drawString('FLIPPERS ARE HARMLESS MID-FLIP', [80, 393], 'small', 'align-left', GameView.RED, context);
+    Util.drawString('ENEMY BULLETS ARE DESTRUCTIBLE', [80, 409], 'small', 'align-left', GameView.RED, context);
+
   }
 
 }
