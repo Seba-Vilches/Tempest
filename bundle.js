@@ -556,6 +556,21 @@ const Util = {
     return topLft[0] <= pos[0] && pos[0] <= btmRgt[0] && topLft[1] <= pos[1] && pos[1] <= btmRgt[1];
   },
 
+// Detecta si el mouse está sobre la flecha derecha (>)
+  overRight(pos) {
+    const topLft = [390, 210];  // Esquina superior izquierda del área de la flecha derecha
+    const btmRgt = [460, 240];  // Esquina inferior derecha del área de la flecha derecha
+    return topLft[0] <= pos[0] && pos[0] <= btmRgt[0] && topLft[1] <= pos[1] && pos[1] <= btmRgt[1];
+  },
+
+  // Detecta si el mouse está sobre la flecha izquierda (<)
+  overLeft(pos) {
+    const topLft = [290, 210];  // Esquina superior izquierda del área de la flecha izquierda
+    const btmRgt = [360, 240];  // Esquina inferior derecha del área de la flecha izquierda
+    return topLft[0] <= pos[0] && pos[0] <= btmRgt[0] && topLft[1] <= pos[1] && pos[1] <= btmRgt[1];
+  }
+
+
 };
 
 module.exports = Util;
@@ -932,6 +947,7 @@ const EnemyExplosion = __webpack_require__(5);
 class Game {
   constructor() {
     this.blaster = new Blaster({ game: this });
+    this.selectedShapeIndex = 0;
     this.start();
     this.over = true;
 
@@ -940,6 +956,11 @@ class Game {
     this.blasterExplosionSound = new Audio('ogg/blasterExplosion.ogg');
     this.enemyBulletSound = new Audio('ogg/enemyBullet.ogg');
     this.enemyExplosionSound = new Audio('ogg/enemyExplosion.ogg');
+  }
+
+  setSelectedShapeIndex(index) {
+    this.selectedShapeIndex = index;
+    console.log(this.selectedShapeIndex)
   }
 
   start() {
@@ -961,7 +982,8 @@ class Game {
     this.score = 0;
     this.level = 1;
 
-    this.defineTubeQuads(Game.TUBE_CIRCLE);
+    const shapeIndex = this.selectedShapeIndex;
+    this.defineTubeQuads(Game.TUBE_SHAPES[shapeIndex]);
     this.innerEnemyQueue = [];
     this.outerEnemyQueue = Array(this.tubeQuads.length).fill(null);
 
@@ -1277,6 +1299,7 @@ class Game {
   }
 
   step() {
+
     this.checkCollisions();
     this.moveObjects();
     this.addOuterEnemyQueueToTube();
@@ -1706,6 +1729,19 @@ Game.TUBE_SHAPES = [
   Game.TUBE_HEART,
 ];
 
+Game.TUBE_NAMES = [
+  "CIRCLE",
+  "SQUARE",
+  "STARBURST",
+  "CROSS",
+  "PEANUT",
+  "CLOVER",
+  "CELTIC",
+  "HEART"
+];
+
+
+
 module.exports = Game;
 
 
@@ -1797,6 +1833,7 @@ module.exports = EnemyBullet;
 
 const Util = __webpack_require__(0);
 
+
 class GameView {
   constructor(game, canvasEl) {
     this.game = game;
@@ -1806,6 +1843,19 @@ class GameView {
     this.animate();
     this.clickToStartTimer = 16;
     this.changeXPosOnMouseWheel = true;
+    this.drawSplashScreen = this.drawSplashScreen.bind(this);
+    this.selectedShapeIndex = 0;
+    this.tubeNames = [
+      "CIRCLE",
+      "SQUARE",
+      "STARBURST",
+      "CROSS",
+      "PEANUT",
+      "CLOVER",
+      "CELTIC",
+      "HEART"
+    ];
+    
   }
 
   bindHandlers(canvasEl) {
@@ -1893,6 +1943,12 @@ class GameView {
         window.open('https://ygdanchoi.github.io');
       } else if (Util.overMailTo([e.offsetX, e.offsetY])) {
         window.open('mailto:ygdanchoi@gmail.com');
+      } else if (Util.overLeft([e.offsetX, e.offsetY])) {
+        this.selectedShapeIndex = (this.selectedShapeIndex - 1 + this.tubeNames.length) % this.tubeNames.length;
+        this.game.setSelectedShapeIndex(this.selectedShapeIndex);
+      } else if (Util.overRight([e.offsetX, e.offsetY])) {
+        this.selectedShapeIndex = (this.selectedShapeIndex + 1) % this.tubeNames.length;
+        this.game.setSelectedShapeIndex(this.selectedShapeIndex);
       } else {
         this.game.over = false;
         this.game.start();
@@ -1908,11 +1964,16 @@ class GameView {
     } else {
       this.drawSplashScreen(this.context);
     }
-    setTimeout(this.animate.bind(this), 33); // 30 fps
+    setTimeout(() => {
+      this.animate();
+      if (this.game.over) {
+        this.drawSplashScreen(this.context);
+      }
+    }, 33);
     this.changeXPosOnMouseWheel = true;
   }
 
-  drawSplashScreen(context) {
+  drawSplashScreen = (context) => {
     context.clearRect(0, 0, GameView.DIM_X, GameView.DIM_Y);
     context.fillStyle = GameView.BLACK;
     context.fillRect(0, 0, GameView.DIM_X, GameView.DIM_Y);
@@ -1923,11 +1984,17 @@ class GameView {
     } else if (this.clickToStartTimer < -8) {
       this.clickToStartTimer = 16;
     }
+
     this.clickToStartTimer -= 1;
-    Util.drawString('POINT OR  < >  TO MOVE', [132, 225], 'small', 'align-left', GameView.YELLOW, context);
-    Util.drawString('CLICK OR SPACE TO SHOOT', [132, 241], 'small', 'align-left', GameView.YELLOW, context);
-    Util.drawString('FLIPPERS ARE HARMLESS MID-FLIP', [99, 273], 'small', 'align-left', GameView.RED, context);
-    Util.drawString('ENEMY BULLETS ARE DESTRUCTIBLE', [99, 289], 'small', 'align-left', GameView.RED, context);
+    const shapeName = (this.tubeNames && this.tubeNames[this.selectedShapeIndex]) || "DEFAULT_NAME";
+    Util.drawString(`${shapeName}`, [325, 224], 'small', 'align-left', GameView.CYAN, context);
+    Util.drawString('>', [425,224], 'small', 'align-right', GameView.CYAN, context)
+    Util.drawString('<', [305,224], 'small', 'align-right', GameView.CYAN, context)
+    Util.drawString('SELECT STARTER LEVEL', [80, 224], 'small', 'align-left', GameView.CYAN, context);
+    Util.drawString('POINT OR  < >  TO MOVE', [132, 255], 'small', 'align-left', GameView.YELLOW, context);
+    Util.drawString('CLICK OR SPACE TO SHOOT', [132, 271], 'small', 'align-left', GameView.YELLOW, context);
+    Util.drawString('FLIPPERS ARE HARMLESS MID-FLIP', [99, 293], 'small', 'align-left', GameView.RED, context);
+    Util.drawString('ENEMY BULLETS ARE DESTRUCTIBLE', [99, 309], 'small', 'align-left', GameView.RED, context);
     Util.drawString('CODED BY DANIEL CHOI', [148, 406], 'small', 'align-left', GameView.CYAN, context);
     Util.drawString('GITHUB - PORTFOLIO - MAILTO', [110, 422], 'small', 'align-left', GameView.CYAN, context);
   }
