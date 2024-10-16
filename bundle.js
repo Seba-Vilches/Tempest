@@ -362,6 +362,31 @@ const Util = {
         context.lineTo(...Util.addVector(pos, points.btmL));
         context.lineTo(...Util.addVector(pos, points.btmR));
         break;
+      case 'Q':
+        // Primero dibujamos el círculo principal (como el "O")
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        
+        // Agregamos la cola diagonal característica de la Q
+        // Asumiendo que points contiene las coordenadas necesarias
+        // Si no tienes estos puntos, necesitarás definirlos
+        const tailStart = {
+            x: points.btmR[0] - 5,  // Un poco a la izquierda del punto inferior derecho
+            y: points.btmR[1] - 5   // Un poco arriba del punto inferior derecho
+        };
+        const tailEnd = {
+            x: points.btmR[0] + 3,  // Extiende hacia la derecha
+            y: points.btmR[1] + 3   // Extiende hacia abajo
+        };
+        
+        // Dibujamos la cola
+        context.moveTo(...Util.addVector(pos, [tailStart.x, tailStart.y]));
+        context.lineTo(...Util.addVector(pos, [tailEnd.x, tailEnd.y]));
+        break;
+      
       case 'D':
         context.moveTo(...Util.addVector(pos, points.topL));
         context.lineTo(...Util.addVector(pos, points.topC));
@@ -982,7 +1007,7 @@ class Game {
     this.score = 0;
     this.level = 1;
 
-    const shapeIndex = this.selectedShapeIndex;
+    const shapeIndex = this.selectedShapeIndex; 
     this.defineTubeQuads(Game.TUBE_SHAPES[shapeIndex]);
     this.innerEnemyQueue = [];
     this.outerEnemyQueue = Array(this.tubeQuads.length).fill(null);
